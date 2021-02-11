@@ -3,6 +3,8 @@ package umm3601.todo;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 
@@ -28,5 +30,17 @@ import com.google.gson.Gson;
 
   public int size() {
     return allTodos.length;
+  }
+
+  /**
+   * Get an array of all the todos satisfying the queries in the params.
+   *
+   * @param queryParams map of key-value pairs for the query
+   * @return an array of all the todos matching the given criteria
+   */
+  public Todo[] listTodos(Map<String, List<String>> queryParams) {
+    Todo[] filteredTodos = allTodos;
+
+  return filteredTodos;
   }
  }
