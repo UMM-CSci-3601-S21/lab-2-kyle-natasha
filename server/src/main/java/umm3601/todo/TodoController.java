@@ -18,7 +18,7 @@ public class TodoController {
    *
    * @param database the `Database` containing user data
    */
-  public UserController(DatabaseTD database) {
+  public TodoController(DatabaseTD database) {
     this.database = database;
   }
 }
