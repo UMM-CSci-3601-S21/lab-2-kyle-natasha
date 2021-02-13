@@ -44,9 +44,25 @@ import com.google.gson.Gson;
    */
   public Todo[] listTodos(Map<String, List<String>> queryParams) {
     Todo[] filteredTodos = allTodos;
+    // Filter category if defined
+    if (queryParams.containsKey("category")) {
+      String targetCategory = queryParams.get("category").get(0);
+      filteredTodos = filterTodosByCategory(filteredTodos, targetCategory);
+    }
     // Process other query parameters here...
 
     return filteredTodos;
+  }
+  /**
+   * Get an array of all the todos having the target category.
+   *
+   * @param todos         the list of todos to filter by category
+   * @param targetCategory the target category to look for
+   * @return an array of all the todos from the given list that have the target
+   *         category
+   */
+  public Todo[] filterTodosByCategory(Todo[] todos, String targetCategory) {
+    return Arrays.stream(todos).filter(x -> x.category.equals(targetCategory)).toArray(Todo[]::new);
   }
 
  }
