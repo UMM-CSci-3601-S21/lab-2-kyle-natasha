@@ -32,7 +32,11 @@ import com.google.gson.Gson;
     return allTodos.length;
   }
 
-  /**
+  public Todo getTodo(String id) {
+    return Arrays.stream(allTodos).filter(x -> x._id.equals(id)).findFirst().orElse(null);
+  }
+
+    /**
    * Get an array of all the todos satisfying the queries in the params.
    *
    * @param queryParams map of key-value pairs for the query
@@ -40,7 +44,9 @@ import com.google.gson.Gson;
    */
   public Todo[] listTodos(Map<String, List<String>> queryParams) {
     Todo[] filteredTodos = allTodos;
+    // Process other query parameters here...
 
-  return filteredTodos;
+    return filteredTodos;
   }
+
  }
