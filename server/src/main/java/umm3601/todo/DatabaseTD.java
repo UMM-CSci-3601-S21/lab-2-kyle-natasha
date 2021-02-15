@@ -3,6 +3,7 @@ package umm3601.todo;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,14 +39,13 @@ import io.javalin.http.BadRequestResponse;
   }
 
     /**
-   * Get an array of all the todos satisfying the queries in the params.
+   * Gets an array of all the todos satisfying the queries in the params.
    *
    * @param queryParams map of key-value pairs for the query
    * @return an array of all the todos matching the given criteria
    */
   public Todo[] listTodos(Map<String, List<String>> queryParams) {
     Todo[] filteredTodos = allTodos;
-
     // Filter owner if defined
     if (queryParams.containsKey("owner")) {
       String targetOwner = queryParams.get("owner").get(0);
@@ -82,30 +82,32 @@ import io.javalin.http.BadRequestResponse;
         "' cannot be converted to an integer");
       }
     }
+    if (queryParams.containsKey("orderBy")) {
+      String targetOrder = queryParams.get("orderBy").get(0);
+      filteredTodos = filterTodosByOrder(filteredTodos, targetOrder);
+    }
     // Process other query parameters here...
 
     return filteredTodos;
   }
 
   /**
-   * Get an array of all the todos having the target owner.
+   * Gets an array of all the todos having the target owner.
    *
    * @param todos     the list of todos to filter by owner
    * @param targetOwner the target owner to look for
-   * @return an array of all the todos from the given list that have the target
-   *         owner
+   * @return an array of all the todos from the given list that have the target owner
    */
   public Todo[] filterTodosByOwner(Todo[] todos, String targetOwner) {
     return Arrays.stream(todos).filter(x -> x.owner.equals(targetOwner)).toArray(Todo[]::new);
   }
 
   /**
-   * Get an array of all the todos having the target category.
+   * Gets an array of all the todos having the target category.
    *
    * @param todos         the list of todos to filter by category
    * @param targetCategory the target category to look for
-   * @return an array of all the todos from the given list that have the target
-   *         category
+   * @return an array of all the todos from the given list that have the target category
    */
   public Todo[] filterTodosByCategory(Todo[] todos, String targetCategory) {
     return Arrays.stream(todos).filter(x -> x.category.equals(targetCategory)).toArray(Todo[]::new);
@@ -141,5 +143,85 @@ import io.javalin.http.BadRequestResponse;
    */
   public Todo[] filterTodosByLimit(Todo[] todos, int targetLimit) {
     return Arrays.copyOfRange(todos, 0, targetLimit);
+  }
+
+  /**
+   * Gets an array of all the todos in an ordered fashion.
+   *
+   * @param todos       the list of todos to filter through by order
+   * @param targetOrder the attribute which the todos should be ordered by
+   * @return an array of all todos from the given list in the specified order.
+   */
+  public Todo[] filterTodosByOrder(Todo[] todos, String targetOrder){
+    Todo[] newOrder = todos;
+    // The following switch statement chooses the order from the one specified by the client
+    // and runs helper methods where appropriate.
+    switch(targetOrder) {
+      case "owner":
+        newOrder = orderByOwner(todos);
+      break;
+
+      case "category":
+        newOrder = orderByCategory(todos);
+      break;
+
+      case "status":
+        newOrder = orderByStatus(todos);
+      break;
+
+      case "body":
+        newOrder = orderByBody(todos);
+      break;
+
+      default:
+      break;
+    }
+    return newOrder;
+  }
+
+  /*
+  The following section contains four helper methods that are used for sorting the todos
+  in different ways.
+  */
+  private Todo[] orderByOwner (Todo[] todos) {
+    Arrays.sort(todos, new Comparator<Todo>() {
+      public int compare(Todo firstOwner, Todo secondOwner) {
+        return firstOwner.owner.compareTo(secondOwner.owner);
+      }
+     }
+     );
+    return todos;
+  }
+
+  private Todo[] orderByCategory (Todo[] todos) {
+    Arrays.sort(todos, new Comparator<Todo>() {
+      public int compare(Todo firstCategory, Todo secondCategory) {
+        return firstCategory.category.compareTo(secondCategory.category);
+      }
+     }
+     );
+    return todos;
+  }
+
+  private Todo[] orderByStatus (Todo[] todos) {
+    Arrays.sort(todos, new Comparator<Todo>() {
+      public int compare(Todo firstStatus, Todo secondStatus) {
+        String fStatus = String.valueOf(firstStatus.status); // Each boolean value is stringified
+        String sStatus = String.valueOf(secondStatus.status); // to be compared.
+        return fStatus.compareTo(sStatus);
+      }
+    }
+    );
+    return todos;
+  }
+
+  private Todo[] orderByBody (Todo[] todos) {
+    Arrays.sort(todos, new Comparator<Todo>() {
+      public int compare(Todo firstBody, Todo secondBody) {
+        return firstBody.body.compareTo(secondBody.body);
+      }
+    }
+    );
+    return todos;
   }
  }

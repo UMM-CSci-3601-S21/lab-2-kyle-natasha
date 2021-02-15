@@ -2,6 +2,7 @@ package umm3601.todo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,7 +64,7 @@ public class TodoControllerSpec {
     when(ctx.queryParamMap()).thenReturn(queryParams);
     todoController.getTodos(ctx);
 
-    // All the todos passed to `json` should be owned by Fry.
+    // All the todos passed to `json` should be owned by Blanche.
     ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
     verify(ctx).json(argument.capture());
     for (Todo todo : argument.getValue()) {
@@ -80,7 +81,7 @@ public class TodoControllerSpec {
     when(ctx.queryParamMap()).thenReturn(queryParams);
     todoController.getTodos(ctx);
 
-    // All todos should be in the homework category.
+    // All todos should be in the groceries category.
     ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
     verify(ctx).json(argument.capture());
     for (Todo todo : argument.getValue()) {
@@ -164,6 +165,105 @@ public class TodoControllerSpec {
     // ASVAB is not a valid limit amount.
     Assertions.assertThrows(BadRequestResponse.class, () -> {
       todoController.getTodos(ctx);
+    });
+  }
+
+  @Test
+  public void GET_to_request_todos_ordered_by_owner() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] { "owner" }));
+
+    when (ctx.queryParamMap()).thenReturn(queryParams);
+    todoController.getTodos(ctx);
+
+    // All todos in the list should be ordered by owner.
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    int max = argument.getValue().length;
+    for (int i = 0; i < max-1; i++) {
+      Integer f = i;
+      Integer s = i + 1;
+      assertTrue(f.compareTo(s) < 0);
+    }
+  }
+
+  @Test
+  public void GET_to_request_todos_ordered_by_status() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] { "status" }));
+
+    when (ctx.queryParamMap()).thenReturn(queryParams);
+    todoController.getTodos(ctx);
+
+    // All todos in the list should be ordered by status.
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    int max = argument.getValue().length;
+    for (int i = 0; i < max-1; i++) {
+      Integer f = i;
+      Integer s = i + 1;
+      assertTrue(f.compareTo(s) < 0);
+    }
+  }
+
+  @Test
+  public void GET_to_request_todos_ordered_by_body() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("orderBy", Arrays.asList(new String[] { "body" }));
+
+    when (ctx.queryParamMap()).thenReturn(queryParams);
+    todoController.getTodos(ctx);
+
+    // All todos in the list should be ordered by body.
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    int max = argument.getValue().length;
+    for (int i = 0; i < max-1; i++) {
+      Integer f = i;
+      Integer s = i + 1;
+      assertTrue(f.compareTo(s) < 0);
+    }
+  }
+
+  @Test
+  public void GET_to_request_todos_with_multiple_filters() {
+    Map<String, List<String>> queryParams = new HashMap<>();
+    queryParams.put("owner", Arrays.asList(new String[] { "Blanche" }));
+    queryParams.put("status", Arrays.asList(new String[] { "incomplete" }));
+    queryParams.put("limit", Arrays.asList(new String[] { "12" }));
+    queryParams.put("orderBy", Arrays.asList(new String[] { "category" }));
+
+    when(ctx.queryParamMap()).thenReturn(queryParams);
+    todoController.getTodos(ctx);
+
+    // All todos should be owned by Blanche and be incomplete
+    ArgumentCaptor<Todo[]> argument = ArgumentCaptor.forClass(Todo[].class);
+    verify(ctx).json(argument.capture());
+    for (Todo todo : argument.getValue()) {
+      assertEquals("Blanche", todo.owner);
+      assertFalse(todo.status);
+    }
+    // There should be 12 todos in total, and they should be ordered by category.
+    assertEquals(12, argument.getValue().length);
+    for (int i = 0; i < 10; i++) {
+      Integer f = i;
+      Integer s = i + 1;
+      assertTrue(f.compareTo(s) < 0);
+    }
+  }
+
+  @Test
+  public void GET_to_request_todo_with_existent_id() throws IOException {
+    when(ctx.pathParam("id", String.class)).thenReturn(new Validator<String>("58895985f0a4bbea24084abf", "", "id"));
+    todoController.getTodo(ctx);
+    verify(ctx).status(201);
+  }
+
+  @Test
+  public void GET_to_request_todo_with_nonexistent_id() throws IOException {
+    when(ctx.pathParam("id", String.class)).thenReturn(new Validator<String>("nonexistent", "", "id"));
+    Assertions.assertThrows(NotFoundResponse.class, () -> {
+      todoController.getTodo(ctx);
     });
   }
 }
