@@ -58,7 +58,11 @@ import com.google.gson.Gson;
     // Filter status if defined
     if (queryParams.containsKey("status")) {
       String targetStatus = queryParams.get("status").get(0);
-      filteredTodos = filterTodosByStatus(filteredTodos, targetStatus);
+      boolean type= true;
+      if(targetStatus.equals("incomplete")) {
+        type = false;
+      }
+      filteredTodos = filterTodosByStatus(filteredTodos, type);
     }
     // Process other query parameters here...
 
@@ -90,15 +94,13 @@ import com.google.gson.Gson;
   }
 
   /**
-   * Get an array of all the todos having the target category.
+   * Gets an array of all the todos having the target status.
    *
-   * @param todos         the list of todos to filter by category
-   * @param targetCategory the target category to look for
-   * @return an array of all the todos from the given list that have the target
-   *         category
+   * @param todos         the list of todos to filter by completion status
+   * @param targetStatus  the status type to look for (true or false)
+   * @return an array of all the todos from the given list that have the target status type
    */
-  public Todo[] filterTodosByStatus(Todo[] todos, String targetStatus) {
-    return Arrays.stream(todos).filter(x -> x.category.equals(targetStatus)).toArray(Todo[]::new);
+  public Todo[] filterTodosByStatus(Todo[] todos, boolean targetStatus) {
+    return Arrays.stream(todos).filter(x -> x.status == targetStatus).toArray(Todo[]::new);
   }
-
  }
