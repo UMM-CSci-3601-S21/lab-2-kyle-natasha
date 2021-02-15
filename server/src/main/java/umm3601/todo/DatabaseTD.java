@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import io.javalin.http.BadRequestResponse;
 
 
 /**
@@ -64,6 +65,18 @@ import com.google.gson.Gson;
       }
       filteredTodos = filterTodosByStatus(filteredTodos, type);
     }
+    // filter by limit if defined
+    if (queryParams.containsKey("limit")) {
+      String targetLimit = queryParams.get("limit").get(0);
+      try{
+        int intConversion = Integer.parseInt(targetLimit);
+        filteredTodos = filterTodosByLimit(filteredTodos, intConversion);
+      }
+      catch (NumberFormatException e) {
+        throw new BadRequestResponse("The specified limit '" + targetLimit +
+        "' cannot be converted to an integer");
+      }
+    }
     // Process other query parameters here...
 
     return filteredTodos;
@@ -102,5 +115,15 @@ import com.google.gson.Gson;
    */
   public Todo[] filterTodosByStatus(Todo[] todos, boolean targetStatus) {
     return Arrays.stream(todos).filter(x -> x.status == targetStatus).toArray(Todo[]::new);
+  }
+
+  /**
+   *
+   * @param todos       the list of todos to filter by limit
+   * @param targetLimit the integer limit for how many todos to display
+   * @return a trimmed copy of the array of todos containing the specified limit of todos
+   */
+  public Todo[] filterTodosByLimit(Todo[] todos, int targetLimit) {
+    return Arrays.copyOfRange(todos, 0, targetLimit);
   }
  }
