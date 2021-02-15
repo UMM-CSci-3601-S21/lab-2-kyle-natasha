@@ -65,6 +65,11 @@ import io.javalin.http.BadRequestResponse;
       }
       filteredTodos = filterTodosByStatus(filteredTodos, type);
     }
+    //Filter by the body's contents if defined
+    if (queryParams.containsKey("contains")) {
+      String targetContent = queryParams.get("contains").get(0);
+      filteredTodos = filterTodosByContent(filteredTodos, targetContent);
+    }
     // filter by limit if defined
     if (queryParams.containsKey("limit")) {
       String targetLimit = queryParams.get("limit").get(0);
@@ -115,6 +120,17 @@ import io.javalin.http.BadRequestResponse;
    */
   public Todo[] filterTodosByStatus(Todo[] todos, boolean targetStatus) {
     return Arrays.stream(todos).filter(x -> x.status == targetStatus).toArray(Todo[]::new);
+  }
+
+  /**
+   * Gets an array of all the todos having the target body content.
+   *
+   * @param todos         the list of todos to filter by body content
+   * @param targetContent the content to look for in each todo's body
+   * @return an array of all todos from the given list that have the target content
+   */
+  public Todo[] filterTodosByContent(Todo[] todos, String targetContent) {
+    return Arrays.stream(todos).filter(x -> x.body.contains(targetContent) == true).toArray(Todo[]::new);
   }
 
   /**
